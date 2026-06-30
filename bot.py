@@ -9,6 +9,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.effective_user.first_name
     
@@ -74,15 +75,23 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="မှားယွင်းသွားပါပြီ။ နောက်တစ်ခါ ပြန်ရွေးပါ။"
         )
 
+
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("ကျေးဇူးပါဗျ ❤️")
 
 def main():
+    
     application = Application.builder().token(BOT_TOKEN).build()
     
+    
     application.add_handler(CommandHandler("start", start))
+    
+    
     application.add_handler(CallbackQueryHandler(button_handler))
+    
+    
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    
     
     print("Bot is running...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
