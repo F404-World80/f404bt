@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKe
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-ADMIN_ID = 8003321700  # ခင်ဗျားရဲ့ Telegram User ID ထည့်ပါ
+ADMIN_ID = 7825705562  # ခင်ဗျားရဲ့ Telegram User ID ထည့်ပါ
 USER_DATA_FILE = "users.txt"
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
