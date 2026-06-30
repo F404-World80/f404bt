@@ -16,7 +16,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        f"မဂ်လာပါ {user_name}\n#F404-helperကို အသုံးပြုလို့ကျေးဇူးပါ\nအောက်ပါတို့မှ ရွေးချယ်ပေးပါ 👇",
+        f"မဂ်လာပါ {user_name}\nF404-helperကို အသုံးပြုလို့ကျေးဇူးပါ\nအောက်ပါတို့မှ ရွေးချယ်ပေးပါ 👇",
         reply_markup=reply_markup
     )
 
