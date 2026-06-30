@@ -3,13 +3,12 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
-# Bot Token ကို Render ရဲ့ Environment Variable ကနေယူမယ်
-BOT_TOKEN = os.environ.get("8003321700:AAG5_S9f8obtr-l6sqMW9AdSOqmbwWjGzkw")
 
-# Logging setup
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-# /start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.effective_user.first_name
     
@@ -27,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# Callback query handler
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -75,7 +74,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="မှားယွင်းသွားပါပြီ။ နောက်တစ်ခါ ပြန်ရွေးပါ။"
         )
 
-# သာမန် text message အတွက်
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("ကျေးဇူးပါဗျ ❤️")
 
