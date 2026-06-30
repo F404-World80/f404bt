@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 # Bot Token ကို Render ရဲ့ Environment Variable ကနေယူမယ်
-BOT_TOKEN = os.environ.get("8003321700:AAEoRcaC-rxFj85jesIEbdqngqAzfYB1vDA")
+BOT_TOKEN = os.environ.get("8003321700:AAG5_S9f8obtr-l6sqMW9AdSOqmbwWjGzkw")
 
 # Logging setup
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -27,7 +27,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# Callback query handler (ခလုတ်နှိပ်ရင်ပြန်ကြားမယ်)
+# Callback query handler
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -35,7 +35,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     choice = query.data
     
     if choice == 'html_css':
-        # HTML CSS Sharing အတွက်
         keyboard = [
             [InlineKeyboardButton("📥 Group ထဲဝင်ရန်", url="https://t.me/learnhtmlcs2")]
         ]
@@ -48,7 +47,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     
     elif choice == 'starlink':
-        # StarlinkwifiHack အတွက်
         keyboard = [
             [InlineKeyboardButton("📥 Channel ထဲဝင်ရန်", url="https://t.me/smmoffical_55555")]
         ]
@@ -61,7 +59,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     
     elif choice == 'f404':
-        # #F404 အတွက်
         keyboard = [
             [InlineKeyboardButton("📥 Channel ထဲဝင်ရန်", url="https://t.me/learnbg404")]
         ]
@@ -83,19 +80,12 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("ကျေးဇူးပါဗျ ❤️")
 
 def main():
-    # Application စတင်ခြင်း
     application = Application.builder().token(BOT_TOKEN).build()
     
-    # Command handlers
     application.add_handler(CommandHandler("start", start))
-    
-    # Callback query handler
     application.add_handler(CallbackQueryHandler(button_handler))
-    
-    # Message handler
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     
-    # Bot စတင်အလုပ်လုပ်ခြင်း
     print("Bot is running...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
