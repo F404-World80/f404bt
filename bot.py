@@ -3,11 +3,14 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
-
+# Bot Token ကို Render ရဲ့ Environment Variable ကနေယူမယ်
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 # Logging setup
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
 # /start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -80,6 +83,11 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("ကျေးဇူးပါဗျ ❤️")
 
 def main():
+    # Bot Token ရှိမရှိ စစ်ဆေးခြင်း
+    if not BOT_TOKEN:
+        print("ERROR: BOT_TOKEN not found in environment variables!")
+        return
+    
     # Application စတင်ခြင်း
     application = Application.builder().token(BOT_TOKEN).build()
     
