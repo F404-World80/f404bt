@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 # Bot Token ကို Render ရဲ့ Environment Variable ကနေယူမယ်
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_TOKEN = os.environ.get("8003321700:AAEoRcaC-rxFj85jesIEbdqngqAzfYB1vDA")
 
 # Logging setup
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
