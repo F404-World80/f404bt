@@ -6,10 +6,10 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
-
+# Logging setup
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-
+# /start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.effective_user.first_name
     
@@ -27,7 +27,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-
+# Callback query handler
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -75,24 +75,24 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="မှားယွင်းသွားပါပြီ။ နောက်တစ်ခါ ပြန်ရွေးပါ။"
         )
 
-
+# သာမန် text message အတွက်
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("ကျေးဇူးပါဗျ ❤️")
 
 def main():
-    
+    # Application စတင်ခြင်း
     application = Application.builder().token(BOT_TOKEN).build()
     
-    
+    # Command handlers
     application.add_handler(CommandHandler("start", start))
     
-    
+    # Callback query handler
     application.add_handler(CallbackQueryHandler(button_handler))
     
-    
+    # Message handler
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     
-    
+    # Bot စတင်အလုပ်လုပ်ခြင်း
     print("Bot is running...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
