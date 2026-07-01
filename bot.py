@@ -7,7 +7,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 
 # ========== Configuration ==========
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-ADMIN_ID = 7825705562  # ခင်ဗျားရဲ့ User ID
+ADMIN_ID = 7825705562
 USER_DATA_FILE = "users.txt"
 
 # ========== Flask Web Server ==========
@@ -22,8 +22,7 @@ def health():
     return "OK", 200
 
 def run_web():
-    """Web Server ကို သီးခြား Thread နဲ့ Run မယ်"""
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
 # ========== Logging ==========
@@ -31,7 +30,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 # ========== User Functions ==========
 def save_user(user_id, username, first_name):
-    """User ကို သိမ်းဆည်းမယ်"""
     try:
         with open(USER_DATA_FILE, "r") as f:
             users = f.readlines()
@@ -47,7 +45,6 @@ def save_user(user_id, username, first_name):
     print(f"✅ User saved: {user_id} - {username} - {first_name}")
 
 def get_main_keyboard():
-    """Main Menu Keyboard"""
     keyboard = [
         [KeyboardButton("🎨 HTML CSS Sharing")],
         [KeyboardButton("📡 StarlinkwifiHack")],
@@ -118,10 +115,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("User မရှိသေးပါဘူး။")
             return
         
-        if not users:
-            await update.message.reply_text("User မရှိသေးပါဘူး။")
-            return
-        
         total = len(users)
         active = 0
         blocked = 0
@@ -144,8 +137,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         status = "❌ Blocked"
                     
                     report += f"• {first_name} (@{username}) - {status}\n"
-            except Exception as e:
-                print(f"Error reading user: {e}")
+            except Exception:
                 pass
         
         report += f"\n✅ Active: {active}\n❌ Blocked: {blocked}"
@@ -197,9 +189,8 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 user_id = int(parts[0])
                 await context.bot.send_message(chat_id=user_id, text=message)
                 sent += 1
-        except Exception as e:
+        except Exception:
             failed += 1
-            print(f"Failed to send: {e}")
     
     await update.message.reply_text(
         f"✅ စာပို့ပြီးပါပြီ။\n\n"
@@ -216,7 +207,7 @@ def main():
     # Web Server ကို Background Thread နဲ့ Run မယ်
     web_thread = threading.Thread(target=run_web, daemon=True)
     web_thread.start()
-    print("🌐 Web Server started on port 10000")
+    print("🌐 Web Server started on port 8080")
     
     # Telegram Bot ကို Run မယ်
     application = Application.builder().token(BOT_TOKEN).build()
