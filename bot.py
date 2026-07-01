@@ -1,14 +1,35 @@
 import os
 import logging
+import threading
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
+# ========== Configuration ==========
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 ADMIN_ID = 7825705562  # ခင်ဗျားရဲ့ User ID
 USER_DATA_FILE = "users.txt"
 
+# ========== Flask Web Server ==========
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "✅ Bot is running!"
+
+@app.route('/health')
+def health():
+    return "OK", 200
+
+def run_web():
+    """Web Server ကို သီးခြား Thread နဲ့ Run မယ်"""
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
+
+# ========== Logging ==========
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+# ========== User Functions ==========
 def save_user(user_id, username, first_name):
     """User ကို သိမ်းဆည်းမယ်"""
     try:
@@ -26,6 +47,7 @@ def save_user(user_id, username, first_name):
     print(f"✅ User saved: {user_id} - {username} - {first_name}")
 
 def get_main_keyboard():
+    """Main Menu Keyboard"""
     keyboard = [
         [KeyboardButton("🎨 HTML CSS Sharing")],
         [KeyboardButton("📡 StarlinkwifiHack")],
@@ -34,6 +56,7 @@ def get_main_keyboard():
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
+# ========== Bot Handlers ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     save_user(user.id, user.username, user.first_name)
@@ -112,12 +135,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     username = parts[1]
                     first_name = parts[2]
                     
-                    # User ကို စစ်ဆေးမယ်
                     try:
                         await context.bot.send_chat_action(chat_id=int(user_id_line), action="typing")
                         active += 1
                         status = "✅ Active"
-                    except Exception as e:
+                    except Exception:
                         blocked += 1
                         status = "❌ Blocked"
                     
@@ -128,7 +150,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         report += f"\n✅ Active: {active}\n❌ Blocked: {blocked}"
         
-        # Report ကို အပိုင်းပိုင်းခွဲပြီး ပို့မယ်
         if len(report) > 4000:
             for i in range(0, len(report), 4000):
                 await update.message.reply_text(report[i:i+4000])
@@ -178,15 +199,26 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 sent += 1
         except Exception as e:
             failed += 1
-            print(f"Failed to send to {user_id}: {e}")
+            print(f"Failed to send: {e}")
     
-    await update.message.reply_text(f"✅ စာပို့ပြီးပါပြီ။\n\n✅ အောင်မြင်: {sent} ဦး\n❌ မအောင်မြင်: {failed} ဦး")
+    await update.message.reply_text(
+        f"✅ စာပို့ပြီးပါပြီ။\n\n"
+        f"✅ အောင်မြင်: {sent} ဦး\n"
+        f"❌ မအောင်မြင်: {failed} ဦး"
+    )
 
+# ========== Main ==========
 def main():
     if not BOT_TOKEN:
         print("ERROR: BOT_TOKEN not found!")
         return
     
+    # Web Server ကို Background Thread နဲ့ Run မယ်
+    web_thread = threading.Thread(target=run_web, daemon=True)
+    web_thread.start()
+    print("🌐 Web Server started on port 10000")
+    
+    # Telegram Bot ကို Run မယ်
     application = Application.builder().token(BOT_TOKEN).build()
     
     application.add_handler(CommandHandler("start", start))
@@ -194,7 +226,7 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CommandHandler("broadcast", broadcast_command))
     
-    print("Bot is running...")
+    print("🤖 Bot is running...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
