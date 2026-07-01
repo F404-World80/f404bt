@@ -4,16 +4,17 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKe
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-ADMIN_ID = 7825705562
+ADMIN_ID = 7825705562  # ခင်ဗျားရဲ့ User ID
 USER_DATA_FILE = "users.txt"
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def save_user(user_id, username, first_name):
+    """User ကို သိမ်းဆည်းမယ်"""
     try:
         with open(USER_DATA_FILE, "r") as f:
             users = f.readlines()
-    except:
+    except FileNotFoundError:
         users = []
     
     for line in users:
@@ -22,6 +23,7 @@ def save_user(user_id, username, first_name):
     
     with open(USER_DATA_FILE, "a") as f:
         f.write(f"{user_id}|{username or 'No username'}|{first_name}\n")
+    print(f"✅ User saved: {user_id} - {username} - {first_name}")
 
 def get_main_keyboard():
     keyboard = [
@@ -89,7 +91,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             with open(USER_DATA_FILE, "r") as f:
                 users = f.readlines()
-        except:
+        except FileNotFoundError:
+            await update.message.reply_text("User မရှိသေးပါဘူး။")
+            return
+        
+        if not users:
             await update.message.reply_text("User မရှိသေးပါဘူး။")
             return
         
@@ -100,21 +106,34 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         for line in users:
             try:
-                user_id_line, username, first_name = line.strip().split("|")
-                try:
-                    await context.bot.send_chat_action(chat_id=user_id_line, action="typing")
-                    active += 1
-                    status = "✅ Active"
-                except:
-                    blocked += 1
-                    status = "❌ Blocked"
-                
-                report += f"• {first_name} (@{username}) - {status}\n"
-            except:
+                parts = line.strip().split("|")
+                if len(parts) >= 3:
+                    user_id_line = parts[0]
+                    username = parts[1]
+                    first_name = parts[2]
+                    
+                    # User ကို စစ်ဆေးမယ်
+                    try:
+                        await context.bot.send_chat_action(chat_id=int(user_id_line), action="typing")
+                        active += 1
+                        status = "✅ Active"
+                    except Exception as e:
+                        blocked += 1
+                        status = "❌ Blocked"
+                    
+                    report += f"• {first_name} (@{username}) - {status}\n"
+            except Exception as e:
+                print(f"Error reading user: {e}")
                 pass
         
         report += f"\n✅ Active: {active}\n❌ Blocked: {blocked}"
-        await update.message.reply_text(report)
+        
+        # Report ကို အပိုင်းပိုင်းခွဲပြီး ပို့မယ်
+        if len(report) > 4000:
+            for i in range(0, len(report), 4000):
+                await update.message.reply_text(report[i:i+4000])
+        else:
+            await update.message.reply_text(report)
     
     else:
         await update.message.reply_text("ကျေးဇူးပါဗျ ❤️")
@@ -144,20 +163,24 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         with open(USER_DATA_FILE, "r") as f:
             users = f.readlines()
-    except:
+    except FileNotFoundError:
         await update.message.reply_text("User မရှိသေးပါဘူး။")
         return
     
     sent = 0
+    failed = 0
     for line in users:
         try:
-            user_id = line.split("|")[0]
-            await context.bot.send_message(chat_id=user_id, text=message)
-            sent += 1
-        except:
-            pass
+            parts = line.strip().split("|")
+            if len(parts) >= 1:
+                user_id = int(parts[0])
+                await context.bot.send_message(chat_id=user_id, text=message)
+                sent += 1
+        except Exception as e:
+            failed += 1
+            print(f"Failed to send to {user_id}: {e}")
     
-    await update.message.reply_text(f"စာပို့ပြီးပါပြီ။ {sent} ဦးဆီ ပို့ခဲ့တယ်။")
+    await update.message.reply_text(f"✅ စာပို့ပြီးပါပြီ။\n\n✅ အောင်မြင်: {sent} ဦး\n❌ မအောင်မြင်: {failed} ဦး")
 
 def main():
     if not BOT_TOKEN:
